@@ -3,7 +3,7 @@ This is a description of Sector's Edge server protocol along with all the script
 information for the analysis of the protocol.
 
 # Described and to be described
-- [ ] Handshake
+- [x] [Handshake](handshake.md)
 - [ ] Player information
 - [ ] Map information
 - [ ] ???
