@@ -3,6 +3,7 @@ This is a description of Sector's Edge server protocol along with all the script
 information for the analysis of the protocol.
 
 # Described and to be described
+All descriptions analyze the UDP stream and use a specific [notation](NOTATION.md)
 - [x] [Handshake](handshake.md)
 - [ ] Player information
 - [ ] Map information
