@@ -1,4 +1,6 @@
 # Handshake
+**NOTE:** The handshake is very similar to the handshake sent by ALL enet connections. However, enet usually sends 2 packets, not 7. Once that detail is figured out all of this document is probably up for deletion.
+
 The handshake consists of 7 packets:
 ```
 1:      client -> server
