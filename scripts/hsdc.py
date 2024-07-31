@@ -55,16 +55,16 @@ if __name__ == '__main__':
     print("OPEN SE WINDOW")
     time.sleep(10)
     print(gmdict)
-    with open('{serverloc}\\lobby.json') as l:
+    with open(f'{serverloc}\\lobby.json') as l:
         d = json.loads(l.read())
         for z, e in enumerate(gmdict):
-            if os.path.isfile(f"{server_loc}\\lobby{z+1}.json"):
+            if os.path.isfile(f"{serverloc}\\lobby{z+1}.json"):
                 continue
-            with open(f"{server_loc}\\lobby{z+1}.json", "w") as w:
+            with open(f"{serverloc}\\lobby{z+1}.json", "w") as w:
                 d["GameModes"]=[e[1]]
                 d["Maps"]=[e[0]]
                 w.write(json.dumps(d))
-            p = psutil.Popen([f"{server_loc}\\sectorsedgeserver.exe", f"{z+1}"])
+            p = psutil.Popen([f"{serverloc}\\sectorsedgeserver.exe", f"{z+1}"])
             capture_thread = multiprocessing.Process(target = start_capture, args = (f"{e[0]}-{e[1]}.pcapng",))
             capture_thread.start()
             time.sleep(5)
