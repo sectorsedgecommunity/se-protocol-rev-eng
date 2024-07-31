@@ -42,7 +42,7 @@ if __name__ == '__main__':
                 add_path(f, "cs")
                 if check_teamspawns(i, "brk"):
                     add_path(f, "brk")
-            if "FlagSpawns" in i and len(i["FlagSpawns"]) > 1: # read NOTE 1 for the script in README.md (1)
+            if "FlagSpawns" in i and len(i["FlagSpawns"]) > 1: # read NOTE 3 for the script in README.md (1)
                 if check_teamspawns(i, "ctf"):
                     add_path(f, "ctf")
                 if check_teamspawns(i, "esc"):
