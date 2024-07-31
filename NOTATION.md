@@ -17,4 +17,5 @@ The list of closing tags is the same for each each file:
 >   changing with a rule
 ?   dynamic (mostly used as unknown rule >)o
 *   static, specific to either client->server or server->client, depending on the indentation
+--  continuation of the previous tag(for multibyte elements)
 ```
