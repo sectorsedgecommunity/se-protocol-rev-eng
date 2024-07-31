@@ -40,47 +40,45 @@ client
 
 Analyzing the stream:
 ```
-00000000  t/ s/ 83 20 q/ x_1           . p   / x_2       
+00000000  p> -- t> -- q/ x_1           . t   / x_2       
 00000010   
 00000020                                     . cid       ?   
 00000030  o         *
 ---                                        
-    00000000  t/ s/ 0e i> q/ x_1           . p   / x_2       
+    00000000  p> -- t> -- q/ x_1           . t   / x_2       
     00000010   
     00000020                                     . cid       ?
     ---   
-    00000030  t/ s/ 0e i> q/ x_1           . p   / x_2       
+    00000030  p> -- t> -- q/ x_1           . t   / x_2       
     00000040   
     00000050                                     . cid       ?
     ---
-    00000060  t/ s/ 0e i> q/ x_1           . p   / x_2       
+    00000060  p> -- t> -- q/ x_1           . t   / x_2       
     00000070   
     00000080                                     . cid       ?
     ---
-    00000090  t/ s/ 0e i> q/ x_1           . p   / x_2       
+    00000090  p> -- t> -- q/ x_1           . t   / x_2       
     000000A0   
     000000B0                                     . cid       ?
     ---   
-    000000C0  t/ s/ 0e i> q/ x_1           . p   / x_2       
+    000000C0  p> -- t> -- q/ x_1           . t   / x_2       
     000000D0   
     000000E0                                     . cid       ?
 ---
-00000034  t/ s/ 83 32 q/ x_1           . p   / x_2       
+00000034  t> -- t> -- q/ x_1           . t   / x_2       
 00000044   
 00000054                                     . cid       ?   
 00000064  o         *
 ```
 **Known:**
-- `t<` is a reliable ENet packet ID  
-  40 from client  
-  48 from server
-
+- `p<` u16 peer ID  
+  40 00 from client  
+  48 ff from server(should increase/be different for each client)
+- `t<` u16 sent time
 **Partly known:**
-- `s<` - always `ff` from client, `00` from server.  
-  Purpose unknown.
 - `q<` - always `82` from client, `83` from server.  
   Purpose unknown.
-- `p<` - always `ff ff` from client, `00 00` from server.  
+- `i<` - always `ff ff` from client, `00 00` from server.  
   Purpose unknown.
 - `o<` - always `00 00 00 00`, only present in the client
   Purpose unknown.
@@ -90,11 +88,6 @@ Analyzing the stream:
   x_2 = 00 00 05 00 00 01 00 00 00 00 00 ff 00 00 00 00 00 00 00 00 00 00 13 88 00 00 00 02 00 00 00 02
   ```
   The purpose of these is unknown
-- `<i>` - increments from packet to packet sent from the server.
-  Say, `i = xy` in the first packet sent from the server
-  Then, in the last packet sent from the server, i is one of:
-    1. `(x+1)y` - all packets increment by 4
-    2. `(x+1)(y-1)` - one of the packets increment by 3 and every other by 4
 - `<cid>` - unique id for every connection
   (here, `cid = 6d 6e e2 1e` but it does not matter)
 
