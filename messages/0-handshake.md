@@ -1,0 +1,2 @@
+# Handshake
+The handshake is not listed in [message types](../message-types.md) because the handshake is not specific to Sector's Edge -- it is the ENet handshake, and makes up the first 7 packets exchanged between the server and the client

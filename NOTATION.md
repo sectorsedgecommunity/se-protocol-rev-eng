@@ -1,8 +1,8 @@
 # Notation
 UDP streams are written down in the usual fashion:
 ```
-8 digit (hex) number  16 bytes in hex and double spaces between each 8 bytes
-00000000  00 00 00 00 00 00 00 00  ff ff ff ff ff ff ff ff
+8 digit (hex) number  16 bytes in hex and double spaces between each 8 bytes  ascii representation with nulls replaced with dots
+00000000  00 00 00 00 00 00 00 00  ff ff ff ff ff ff ff ff  ...(so on)
 00000010  ...
 ```
 

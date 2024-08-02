@@ -1,4 +1,4 @@
-# join (JoiningMessage)
+# Join (JoiningMessage)
 This is the first message sent by the client to the server and signals joining the game after connecting to the server.
 
 # Definition

@@ -1,3 +1,31 @@
+"""
+IMPORTANT:
+    THIS SCRIPT WILL MAKE YOUR COMPUTER UNUSABLE FOR 72.5 MINUTES!
+USAGE:
+    make sure your display is 1920x1080 and sector's edge is in fullscreen
+    1. install the requirements placed alongside the script:
+           pip install -r requirements.txt
+    2. put the script in the same folder as your server executable
+    3. open sector's edge
+    3. run it!
+    4. switch into the game window when it tells you to
+    4? if you wish to restart the script from scratch, delete all the 
+       lobby(x).json files it generated in your se folder
+TROUBLESHOOTING:
+    1. the script will break on crossing breakthrough (cr-brk)
+       and reactor breakthrough (r-brk)
+       when this happens, simply restart the script - it doesnt collect data 
+       again if the lobby(x).json for the combination is present
+       (presuming they combinations stay in the same order! as they are
+       regenerated every run)
+    2. the script requires the jsons for the maps to be perfect!
+       this includes:
+          1. no comments, python doesnt know how to handle them
+          2. no useless rushspawns, flagspawns, weaponspawns, teamspawns
+       if there are such issues, the script will assume some impossible 
+       gamemodes for maps are actually deemed possible due to simplified checks
+"""
+
 import json
 import os
 import pyshark
@@ -42,14 +70,14 @@ if __name__ == '__main__':
                 add_path(mapfile, "cs")
                 if check_teamspawns(mapjson, "brk"):
                     add_path(mapfile, "brk")
-            if "FlagSpawns" in mapjson and len(mapjson["FlagSpawns"]) > 1: # read NOTE 3 for the script in README.md (1)
+            if "FlagSpawns" in mapjson and len(mapjson["FlagSpawns"]) > 1: # TROUBLESHOOTING 2.2
                 if check_teamspawns(mapjson, "ctf"):
                     add_path(mapfile, "ctf")
                 if check_teamspawns(mapjson, "esc"):
                     add_path(mapfile, "esc")
-            if "RushStages" in mapjson: # (1)
+            if "RushStages" in mapjson: # TROUBLESHOOTING 2.2
                 add_path(mapfile, "rush")
-            if "WeaponSpawns" in mapjson: # (1)
+            if "WeaponSpawns" in mapjson: # TROUBLESHOOTING 2.2
                 add_path(mapfile, "hh")
 
     print("OPEN SE WINDOW")

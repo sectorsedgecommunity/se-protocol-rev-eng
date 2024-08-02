@@ -1,22 +1,22 @@
-// this  prgram will connect to a sectors edge server on port 11810
-// and dump the received packages server
-// or listen on port 11810 for incoming connections of an sectors edge client
-// and dump the packages received from the client
+// USAGE:
+//  download and unpack in the same folder:
+//   https://github.com/nxrighthere/ENet-CSharp/releases/download/2.4.7/ENet-CSharp-2.4.7-x64.zip
+//  please note that that is not the latest version ^, that is 2.4.7
+//  this specific library is used because it is also used by Sector's Edge
+//  compile with fsharpc -r:ENet-CSharp.dll enet.fs
+//  run with -s to execute the server
+//  run without arguments to execute the client
 
-// download and unpack in the same folder: https://github.com/nxrighthere/ENet-CSharp/releases/download/2.4.7/ENet-CSharp-2.4.7-x64.zip
-// compile with fsharpc -r:ENet-CSharp.dll enet.fs
-// run with -s to execute the server
-// run without arguments to execute the client
-
-// TROUBLESHOOTING
-// if the program does not start the server and instead the client starts
-// comment out the function `client` and rename the server function to something else
-// the replace the if clause in the main with a call to that name
-// it should look like this:
-// let main args =
+// TROUBLESHOOTING:
+//  if the program ignores the -s flag and starts the client anyway
+//  comment out the function `client` and rename the server function to something else
+//  and replace the if clause in the main function with a call to that name
+//  your main should look like this:
+//  let main args =
 //    printfn "Running"
-//    new_server_fun_name
-//      0   
+//      new_server_fun_name
+//        0
+//  if you have done that, the -s flag is no longer needed
 
 open ENet
 open System
