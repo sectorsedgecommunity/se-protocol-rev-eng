@@ -17,7 +17,7 @@ Some numeric values may represent enums
 ## Variable sized types
 | Type         | Purpose                                 |
 | ------------ | --------------------------------------- |
-| byte[] u64[] | first u16 is the length of the list     |
+| byte[] u64[] | first byte is the length of the list    |
 | String       | first u16 is the length of the string   |
 | longString   | first int is the length of the string   |
 | dictionaries | currently undocumented                  |

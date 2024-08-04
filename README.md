@@ -13,5 +13,5 @@ Further notes on the usage and troubleshooting of every script can be found in t
 
 1. [dc.py](scripts/dc/dc.py)
    produces `{mapcode}-{gamemodecode}.pcapng` for each of the 140 - 2 bugged combinations of map-gamemode - files consiting of packets sent between a client and a local server over a 30 second period of the client connecting, spawning and disconnecting.  
-2. [enet.fs](scripts/enet.fs)
-   mimics a basic client or server and collects and pretty-prints the packets received from the official server or the official client respectively.  
+2. [enet.cs](scripts/enet.cs)
+   mimics a basic client, server or proxies traffic and collects and pretty-prints the packets received from the official server or the official client respectively.
