@@ -1,3 +1,5 @@
+// OBSOLETE use enet.cs instead  
+
 // USAGE:
 //  download and unpack in the same folder:
 //   https://github.com/nxrighthere/ENet-CSharp/releases/download/2.4.7/ENet-CSharp-2.4.7-x64.zip
