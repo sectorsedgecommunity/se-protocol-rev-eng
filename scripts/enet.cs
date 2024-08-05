@@ -26,7 +26,7 @@ class Program {
     public Packet packet;
     public int num;
     
-    public ChannelPacket(byte c, ref Packet p, int n) {
+    public ChannelPacket(byte c, Packet p, int n) {
       chan = c;
       packet = p;
       num = n;
@@ -83,15 +83,15 @@ class Program {
                 Console.WriteLine("{0}: Disconnect{{data: {1}, ipAddr: \"{2}\"}}", log_prefix, ev.Data, ev.Peer.IP);
                 break;
           case EventType.Receive:
-                Packet packet = ev.Packet;
                 byte[] bytes = new byte[ev.Packet.Length];
-                packet.CopyTo(bytes);
-                Console.WriteLine("{0}: Receive{{num: {1} channel: {2}, dataLength: {3}, data: \n\"{4}\"\n\t}}", log_prefix, num, ev.ChannelID, packet.Length, hexdump(16, bytes));
-                outQueue.Enqueue(new ChannelPacket(ev.ChannelID, ref packet, num++));
+                ev.Packet.CopyTo(bytes);
+                Console.WriteLine("{0}: Receive{{num: {1} channel: {2}, dataLength: {3}, data: \n\"{4}\"\n\t}}", log_prefix, num, ev.ChannelID, ev.Packet.Length, hexdump(16, bytes));
+                outQueue.Enqueue(new ChannelPacket(ev.ChannelID, ev.Packet, num++));
                 break;
         }
       }
-      foreach (ChannelPacket packet in inQueue) {
+      ChannelPacket packet;
+      while (inQueue.TryDequeue(out packet)) {
         if (packet.sendTo(peer))
           Console.WriteLine("{0}: Sent {1}", log_prefix, packet.num);
         else 
