@@ -61,20 +61,20 @@ class Program {
   }
 
   static void evloop(Host host, string log_prefix, ref ConcurrentQueue<ChannelPacket> inQueue, ref ConcurrentQueue<ChannelPacket> outQueue, int timeout) {
-    Peer peer;
     Event ev;
+    Peer peer;
     int num = 0;
     Console.WriteLine("{0}: Waiting for connection", log_prefix);
     // wait for connection before anything else
     while (true) {
       if (host.Service(timeout, out ev) == 1 && ev.Type == EventType.Connect) {
-        peer = ev.Peer;
         Console.WriteLine("{0}: Connect{{data: {1}, ipAddr: \"{2}\"}}", log_prefix, ev.Data, ev.Peer.IP);
+        peer = ev.Peer;
         break;
       }
     }
     while (true) {
-      if (host.Service(0, out ev) == 1) {
+      if (host.Service(timeout, out ev) == 1) {
         switch (ev.Type) {
           case EventType.Connect:
                 Console.WriteLine("{0}: Connect{{data: {1}, ipAddr: \"{2}\"}}", log_prefix, ev.Data, ev.Peer.IP);
@@ -85,16 +85,14 @@ class Program {
           case EventType.Receive:
                 byte[] bytes = new byte[ev.Packet.Length];
                 ev.Packet.CopyTo(bytes);
-                Console.WriteLine("{0}: Receive{{num: {1} channel: {2}, dataLength: {3}, data: \n\"{4}\"\n\t}}", log_prefix, num, ev.ChannelID, ev.Packet.Length, hexdump(16, bytes));
+                Console.WriteLine("{0}: Receive{{num: {1}, channel: {2}, dataLength: {3}, data: \n\"{4}\"\n\t}}", log_prefix, num, ev.ChannelID, ev.Packet.Length, hexdump(16, bytes));
                 outQueue.Enqueue(new ChannelPacket(ev.ChannelID, ev.Packet, num++));
                 break;
         }
       }
       ChannelPacket packet;
       while (inQueue.TryDequeue(out packet)) {
-        if (packet.sendTo(peer))
-          Console.WriteLine("{0}: Sent {1}", log_prefix, packet.num);
-        else 
+        if(!packet.sendTo(peer))
           Console.WriteLine("{0}: E: Failed to send {1}", log_prefix, packet.num);
       }
       host.Flush();
@@ -113,7 +111,7 @@ class Program {
     Host server = new Host();
     Address addr = new Address();
     addr.Port = port;
-    server.Create(addr, 1);
+    server.Create(addr, 1, 255);
     Console.WriteLine("I: Created server");
     return server;
   }
