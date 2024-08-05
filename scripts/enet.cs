@@ -122,7 +122,7 @@ class Program {
     addr.SetHost(hostname);
     addr.Port = port;
     client.Create();
-    peer = client.Connect(addr);
+    peer = client.Connect(addr, 255);
     Console.WriteLine("I: Created client");
     return client;
   }
