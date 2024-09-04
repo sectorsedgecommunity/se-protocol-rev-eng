@@ -37,7 +37,7 @@ class Program {
     public void Dispose() => packet.Dispose();
   }  
 
-  static char filterChar(byte b) => (b <= 32 || b > 127) ? '.' : (char)b;
+  static char filterChar(byte b) => (b <= 32 || b >= 127) ? '.' : (char)b;
 
   static string hexdump(int columns, byte[] bytes) {
     int rows = bytes.Length / columns + (bytes.Length % columns > 0 ? 1 : 0);
