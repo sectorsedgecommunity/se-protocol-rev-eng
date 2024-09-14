@@ -64,27 +64,29 @@ class Program {
     }
     return string.Join("\n" , lines);
   }
-  
+
   static void binDump(BinaryWriter writer, Event ev, int num) {
     long time = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+    // most signifcant bit -> is data packet
     if (ev.Type == EventType.Receive) {
-      // 8    4   4   len  len%4   8
-      // time len num data padding "0xcafebabe"
-      writer.Write((Int64) time);
+      // add padding for alignment
+      byte[] bytes = new byte[ev.Packet.Length + (~ev.Packet.Length & 7)];
+      ev.Packet.CopyTo(bytes);
+      // 8    4   4   len  len%7   8
+      // time len num data padding terminator
+      // set most signifcant bit to signify data packet
+      writer.Write((Int64) (time | (1 << 63)));
       writer.Write((Int32) ev.Packet.Length);
       writer.Write((Int32) num);
-      // add padding for alignment
-      byte[] bytes = new byte[ev.Packet.Length + (~ev.Packet.Length & 3)];
-      ev.Packet.CopyTo(bytes);
       writer.Write(bytes);
       writer.Write((Int64) 0xcafebabe);
     } else {
-      // 8    4   4    4      8
-      // time typ data peerId padding
+      // 8    4   4    8      8
+      // time typ data peerId terminator
       writer.Write((Int64) time);
       writer.Write((Int32) ev.Type);
       writer.Write((Int32) ev.Data);
-      writer.Write((UInt32) ev.Peer.ID);
+      writer.Write((UInt64) ev.Peer.ID);
       writer.Write((Int64) 0xdeadbeef);
     }
   }
@@ -124,6 +126,10 @@ class Program {
     public void Act(Action<T> func) {
       if (this.isSome)
         func(this.value);
+    }
+
+    public static implicit operator Option<T>(T value) {
+      return new Option<T>(value);
     }
   }
 
