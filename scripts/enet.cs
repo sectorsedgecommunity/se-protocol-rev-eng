@@ -1,3 +1,12 @@
+//bin/sh -x -c "echo set -x; sed -n '2,\${s/^\/\///p;t;q;}' '$0'" | . /dev/stdin; exit $?
+//test -f ENet-CSharp.dll || error ENet-CSharp.dll not found
+//if test -n "$(find "$0" -newer enet.exe)"; then
+// netstd="$(find /usr/lib/mono/ -type f -name 'netstandard.dll' | tail -n 1)"
+// test -n "$netstd" || error no nestandard or mono install found
+// mono-csc -r:ENet-CSharp.dll -r:"${netstd}" "$0"
+//fi
+//./enet.exe "$@"
+
 // USAGE:
 //  download and unpack in the same folder:
 //   https://github.com/nxrighthere/ENet-CSharp/releases/download/2.4.7/ENet-CSharp-2.4.7-x64.zip
@@ -12,8 +21,10 @@
 //  run with -S "port" to specify the port for the server
 //  run with -C "address:[port]" to specify address and optionally the port
 //  run with -o "output" to specifiy output for a binary recording without the .client.rec/.server.rec suffix
-//  run with -Qto disable all info/error/warning logs
+//  run with -i to disable all info/error/warning logs
 //  run with -q to disable all logging of packet dumps
+
+// or if all requirments are fullfilled make this file executable and run it ;)
 
 using ENet;
 
@@ -67,26 +78,25 @@ class Program {
 
   static void binDump(BinaryWriter writer, Event ev, int num) {
     long time = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-    // most signifcant bit -> is data packet
     if (ev.Type == EventType.Receive) {
-      // add padding for alignment
-      byte[] bytes = new byte[ev.Packet.Length + (~ev.Packet.Length & 7)];
-      ev.Packet.CopyTo(bytes);
-      // 8    4   4   len  len%7   8
-      // time len num data padding terminator
-      // set most signifcant bit to signify data packet
-      writer.Write((Int64) (time | (1 << 63)));
+      // 8    4   4   len  8-len%8 8
+      // time len num data padding 0xcafebabe
+      writer.Write((Int64) time);
       writer.Write((Int32) ev.Packet.Length);
       writer.Write((Int32) num);
+      // add padding for alignment
+      byte[] bytes = new byte[(ev.Packet.Length + 7) & ~7];
+      ev.Packet.CopyTo(bytes);
       writer.Write(bytes);
       writer.Write((Int64) 0xcafebabe);
     } else {
-      // 8    4   4    8      8
-      // time typ data peerId terminator
+      // 8    4   4    4      4        8
+      // time typ data peerId padding  0xdeadbeef
       writer.Write((Int64) time);
       writer.Write((Int32) ev.Type);
       writer.Write((Int32) ev.Data);
-      writer.Write((UInt64) ev.Peer.ID);
+      writer.Write((UInt32) ev.Peer.ID);
+      writer.Write((UInt32) 0);
       writer.Write((Int64) 0xdeadbeef);
     }
   }
@@ -122,15 +132,6 @@ class Program {
       this.value = value;
       isSome = true;
     }
-
-    public void Act(Action<T> func) {
-      if (this.isSome)
-        func(this.value);
-    }
-
-    public static implicit operator Option<T>(T value) {
-      return new Option<T>(value);
-    }
   }
 
   // also accesses the static fields of this class state(volatile uint) and data(volative uint)
@@ -148,7 +149,7 @@ class Program {
       // wait for connection first
       while (true) {
         if (host.Service(0, out ev) == 1 && ev.Type == EventType.Connect) {
-          writer.Act((_writer) => binDump(_writer, ev, 0));
+          if (writer.isSome) binDump(writer.value, ev, num++);
           logPacket(log_prefix, ev);
           log("I: {0}: Connected to {1}", log_prefix, ev.Peer.IP);
           peer = ev.Peer;
@@ -167,7 +168,7 @@ class Program {
         }
         host.Flush();
         if (host.Service(0, out ev) == 1) {
-          writer.Act((_writer) => binDump(_writer, ev, num));
+          if (writer.isSome) binDump(writer.value, ev, num++);
           switch (ev.Type) {
             case EventType.Connect:
                   logPacket(log_prefix, ev);
@@ -178,7 +179,7 @@ class Program {
                   break;
             case EventType.Disconnect:
                   logPacket(log_prefix, ev);
-                  log("I: {0}: Disconnected from {1}", log_prefix, ev.Peer.IP);
+                  log("I: {0}: Disconnected from {2}", log_prefix, ev.Peer.IP);
                   if (ev.Peer.ID == peer.ID) {
                     // disconnect all
                     data = ev.Data;
@@ -187,7 +188,7 @@ class Program {
                   break;
             case EventType.Receive:
                   logDataPacket(log_prefix, num, ev);
-                  outQueue.Enqueue(new ChannelPacket(ev.ChannelID, ev.Packet, num++));
+                  outQueue.Enqueue(new ChannelPacket(ev.ChannelID, ev.Packet, num));
                   break;
           }
         }
@@ -226,7 +227,7 @@ class Program {
     Address addr = new Address();
     addr.Port = port;
     server.Create(addr, 1, 255);
-    log("I: Created server at address 127.0.0.1 on port {0}", port);
+    log("I: Created server at address 127.0.0.1:{0}", port);
     return server;
   }
   
@@ -237,7 +238,7 @@ class Program {
     addr.Port = port;
     client.Create();
     peer = client.Connect(addr, 255);
-    log("I: Created client for address {0} on port {1}", hostname, port);
+    log("I: Created client for address {0}:{1}", hostname, port);
     return client;
   }
 
@@ -281,7 +282,7 @@ class Program {
     int cArgIdx = Array.IndexOf(args, "-C");
     if (cArgIdx != -1) {
       if (cArgIdx + 1 < args.Length) {
-        var arr = args[sArgIdx + 1].Split(":");
+        var arr = args[cArgIdx + 1].Split(":");
         hostname = arr[0];
         if (arr.Length > 1 && !UInt16.TryParse(arr[1], out connectPort)) {
           log("E: {0} after argument -C contains an invalid port", args[cArgIdx + 1]);
@@ -301,13 +302,12 @@ class Program {
         clientOutput = Option<BinaryWriter>.Some(new BinaryWriter(File.Open($"{name}.client.rec", FileMode.Create, FileAccess.Write)));
         serverOutput = Option<BinaryWriter>.Some(new BinaryWriter(File.Open($"{name}.server.rec", FileMode.Create, FileAccess.Write)));
       } else {
-        should_log = true;
         log("E: expected path to output after -o");
         return;
       }
     } 
 
-    if (Array.IndexOf(args, "-Q") != -1)
+    if (Array.IndexOf(args, "-i") != -1)
       should_log = false;
     if (Array.IndexOf(args, "-q") != -1)
       log_packets = false;
